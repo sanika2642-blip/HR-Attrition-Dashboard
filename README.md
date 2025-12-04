@@ -3,7 +3,7 @@ An interactive, modern HR analytics dashboard that reveals employee attrition pa
 Built using **Python, Streamlit, Plotly, Pandas, and Scikit-Learn**.
 
 🌐 **Live App:** https://sanika-j-attrition.streamlit.app  
-📦 **GitHub Repository:** (this repo)
+📦 **GitHub Repository:** https://github.com/sanika2642-blip/HR-Attrition-Dashboard
 
 ---
 
@@ -43,7 +43,8 @@ It provides:
 ---
 
 ## 📸 Dashboard Preview  
-(Upload a screenshot to `/images` folder and uncomment this)
+<img width="1903" height="912" alt="pro" src="https://github.com/user-attachments/assets/9105271e-6018-4eff-90df-b7878311a34a" />
+
 
 ---
 
