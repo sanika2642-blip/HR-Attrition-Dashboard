@@ -168,7 +168,11 @@ st.sidebar.markdown("---")
 st.sidebar.markdown(f"**Dataset**  \nRows: {total_employees}  \nColumns: {df.shape[1]}")
 st.sidebar.markdown(f"**Attrition:** {attrition_count} ({attrition_rate}%)")
 st.sidebar.markdown("---")
-st.sidebar.markdown("Made for OJT — Streamlit edition", unsafe_allow_html=True)
+st.sidebar.markdown("""
+<div style='text-align:center; opacity:0.7; font-size:14px; margin-top:20px;'>
+    Made by <b>sanika_jadhav</b> 🚀
+</div>
+""", unsafe_allow_html=True)
 
 # helpers
 def neon(txt):
