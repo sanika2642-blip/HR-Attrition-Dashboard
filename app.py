@@ -863,13 +863,72 @@ def page_predictor():
             st.success(f"Predicted attrition probability: {round(proba*100,1)}%")
         except Exception as e:
             st.error("Prediction error: " + str(e))
-
-# ---------------------------
-# Export
-# ---------------------------
+# === Export ===
 def page_export():
-    st.markdown('<h2 style="color:#00eaff">Export</h2>', unsafe_allow_html=True)
-    st.download_button("Download dataset CSV", df.to_csv(index=False).encode('utf-8'), "employee_attrition_export.csv")
+    st.markdown('## 📤 Export & Reports', unsafe_allow_html=True)
+    st.markdown('<div class="neon-card"><div class="neon-title">Download your analysis</div><div class="kpi-sub">Export raw data, summaries, or model-ready datasets.</div></div>', unsafe_allow_html=True)
+    left_col, right_col = st.columns(2)
+    with left_col:
+        st.markdown('### 📊 Data Exports')
+        if not df.empty:
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button(label='📁 Full Dataset (CSV)', data=csv, file_name=f'employee_attrition_{total_employees}rows.csv', mime='text/csv')
+            summary_stats = df.describe(include='all').round(2)
+            st.download_button(label='📈 Summary Statistics (CSV)', data=summary_stats.to_csv().encode('utf-8'), file_name='attrition_summary_stats.csv', mime='text/csv')
+            if not grp_dept.empty or not grp_job.empty:
+                risk_summary = pd.DataFrame({
+                    'Metric':['Total Employees','Attrition Count','Attrition Rate %','Avg Age','Avg Income','Avg Tenure','High Risk Dept','High Risk Job'],
+                    'Value':[total_employees, attrition_count, f"{attrition_rate:.1f}%", avg_age, f"${avg_income:,}" if isinstance(avg_income,(int,float)) else avg_income, f"{avg_years} yrs", risk_by_dept, risk_by_job]
+                })
+                st.download_button(label='⚠️ Risk Summary (CSV)', data=risk_summary.to_csv(index=False).encode('utf-8'), file_name='attrition_risk_summary.csv', mime='text/csv')
+    with right_col:
+        st.markdown('### 📋 Advanced Formats')
+        try:
+            import io
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df.to_excel(writer, sheet_name='Raw Data', index=False)
+                if not grp_dept.empty:
+                    grp_dept.assign(rate_pct=lambda x: (x['left']/x['total']*100).round(1)).to_excel(writer, sheet_name='Dept Risk')
+                if not grp_job.empty:
+                    grp_job.assign(rate_pct=lambda x: (x['left']/x['total']*100).round(1)).to_excel(writer, sheet_name='Job Risk')
+                summary_stats.to_excel(writer, sheet_name='Summary Stats')
+            excel_data = output.getvalue()
+            st.download_button(label='📊 Multi-sheet Excel', data=excel_data, file_name=f'hr_attrition_analysis_{total_employees}rows.xlsx', mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        except Exception:
+            st.info('Install `openpyxl` for Excel export: `pip install openpyxl`')
+        json_data = df.to_json(orient='records', indent=2)
+        st.download_button(label='🔗 JSON (API/Model ready)', data=json_data, file_name='attrition_data.json', mime='application/json')
+
+    st.markdown('---')
+    report_content = f"""
+HR ATTRITION ANALYSIS REPORT
+===========================
+Generated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M IST')}
+
+DATASET OVERVIEW
+----------------
+Total Employees: {total_employees:,}
+Attrition Cases: {attrition_count:,} ({attrition_rate}%)
+Average Age: {avg_age} years
+Average Monthly Income: ${avg_income:,}
+Average Tenure: {avg_years} years
+
+HIGH-RISK AREAS
+---------------
+Highest Risk Department: {risk_by_dept}
+Highest Risk Job Role: {risk_by_job}
+
+EXPORTED BY: sanika_jadhav 🚀
+"""
+    st.text_area('Copy this report:', report_content, height=200, label_visibility='collapsed')
+    st.download_button(label='💾 Download Report (TXT)', data=report_content, file_name='hr_attrition_executive_summary.txt', mime='text/plain')
+    st.markdown('---')
+    st.markdown('### 👀 Quick Preview')
+    col1, col2, col3 = st.columns(3)
+    with col1: st.metric('Rows', f"{df.shape[0]:,}")
+    with col2: st.metric('Columns', df.shape[1])
+    with col3: st.metric('Attrition %', f"{attrition_rate}%")
 
 # ---------------------------
 # Router
